@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>MOA Intelligence Engine</title>
+    <meta charset="UTF-8">
+
+    <!-- Research-grade font -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "IBM Plex Sans", sans-serif;
+            background: linear-gradient(135deg, #0b1220, #050814);
+            color: #e6edf3;
+            font-size: 15px;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* LEFT PANEL */
+
+        .left-pane {
+            width: 28%;
+            padding: 45px;
+            background: #0f172a;
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        h2 {
+            font-weight: 600;
+            margin-bottom: 35px;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 500;
+            opacity: 0.7;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 25px;
+            background: #0b1220;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            color: #e6edf3;
+            font-size: 14px;
+        }
+
+        button {
+            background: linear-gradient(90deg, #2563eb, #1d4ed8);
+            color: white;
+            padding: 14px;
+            width: 100%;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* RIGHT PANEL */
+
+        .right-pane {
+            width: 72%;
+            padding: 50px;
+            overflow-y: auto;
+        }
+
+        /* CARD */
+
+        .card {
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 40px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .card-content {
+            overflow: hidden;
+            transition: all 0.25s ease;
+        }
+
+        .card-header span {
+            transition: transform 0.2s ease;
+        }
+
+        .card-header.collapsed span {
+            transform: rotate(-90deg);
+        }
+
+        .big-text {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        /* TABLE */
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 18px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        th {
+            opacity: 0.6;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-family: "IBM Plex Mono", monospace;
+        }
+
+        /* BARS */
+
+        .confidence-bar {
+            height: 6px;
+            width: 50%;
+            background: #1e293b;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .mini-bar {
+            height: 4px;
+            width: 100px;
+            background: #1e293b;
+            border-radius: 4px;
+            display: inline-block;
+            margin-left: 10px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #6366f1);
+            transform-origin: left;
+        }
+
+        /* CONFIDENCE LABEL */
+
+        .confidence-label {
+            margin-top: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .high {
+            color: #22c55e;
+        }
+
+        .moderate {
+            color: #facc15;
+        }
+
+        .low {
+            color: #ef4444;
+        }
+
+        /* INFO SYSTEM */
+
+        .info-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .info-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            min-width: 22px;
+            min-height: 22px;
+
+            border-radius: 50%;
+            background: #2563eb;
+            color: #ffffff;
+
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1;
+
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            cursor: pointer;
+            margin-left: 8px;
+
+            transition: all 0.2s ease;
+        }
+
+        .info-btn:hover {
+            background: #1d4ed8;
+            transform: scale(1.05);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+        }
+
+        .info-popup {
+            position: absolute;
+            top: 32px;
+            /* distance below the i button */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 460px;
+            max-width: 90vw;
+            background: #0b1220;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 22px 24px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+            font-size: 15px;
+            line-height: 1.65;
+            display: none;
+            z-index: 1000;
+        }
+
+
+        .popup-close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            cursor: pointer;
+
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 14px;
+            font-weight: 600;
+
+            color: #f87171;
+            transition: all 0.2s ease;
+        }
+
+        .popup-close:hover {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        /* ================= RIGHT PANE LOADER ================= */
+
+        #rightLoading {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(11, 18, 32, 0.85);
+            backdrop-filter: blur(3px);
+            z-index: 5000;
+        }
+
+        .right-pane {
+            position: relative;
+        }
+
+        .spinner-container {
+            text-align: center;
+        }
+
+        .molecule-spinner {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 4px solid rgba(59, 130, 246, 0.2);
+            border-top: 4px solid #3b82f6;
+            animation: spin 0.9s linear infinite;
+            margin: auto;
+            margin-bottom: 18px;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spinner-container p {
+            font-size: 15px;
+            font-weight: 500;
+            opacity: 0.85;
+        }
+
+        /* ================= MODAL ================= */
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-box {
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 30px;
+            width: 800px;
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            color: #f87171;
+        }
+
+        .modal-content-text {
+            font-family: "IBM Plex Mono", monospace;
+            word-break: break-all;
+            margin-bottom: 25px;
+        }
+
+        .clickable-seq {
+            cursor: pointer;
+            color: #3b82f6;
+        }
+    </style>
+
+    <script>
+        function togglePopup(id) {
+
+            const popup = document.getElementById(id);
+
+            // Close all others first
+            document.querySelectorAll(".info-popup")
+                .forEach(p => {
+                    if (p !== popup) p.style.display = "none";
+                });
+
+            popup.style.display =
+                popup.style.display === "block" ? "none" : "block";
+        }
+
+        function closePopup(id) {
+            const popup = document.getElementById(id);
+            if (popup) popup.style.display = "none";
+        }
+
+        function toggleCard(id) {
+            const el = document.getElementById(id);
+            const header = el.parentElement.querySelector(".card-header");
+
+            if (el.style.display === "none" || el.style.display === "") {
+                el.style.display = "block";
+                header.classList.remove("collapsed");
+            } else {
+                el.style.display = "none";
+                header.classList.add("collapsed");
+            }
+        }
+
+        window.addEventListener("click", function (e) {
+            if (!e.target.classList.contains("info-btn")) {
+                document.querySelectorAll(".info-popup")
+                    .forEach(p => p.style.display = "none");
+            }
+        });
+
+        function openSequenceModal(smiles, protein) {
+
+            document.getElementById("modalSmiles").innerText = smiles;
+            document.getElementById("modalProtein").innerText = protein;
+
+            document.getElementById("sequenceModal").style.display = "flex";
+        }
+
+        function closeSequenceModal() {
+            document.getElementById("sequenceModal").style.display = "none";
+        }
+
+
+        // ================= FORM SUBMIT LOADER =================
+        // ================= FORM SUBMIT LOADER + MODAL INIT =================
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const form = document.querySelector("form");
+
+            if (form) {
+                form.addEventListener("submit", function (e) {
+
+                    const smiles = document.querySelector("input[name='smiles']").value.trim();
+                    const sequence = document.querySelector("textarea[name='protein_sequence']").value.trim();
+                    const uniprot = document.querySelector("input[name='uniprot_id']")?.value.trim();
+
+                    if (!smiles) {
+                        alert("Please enter SMILES.");
+                        e.preventDefault();
+                        return;
+                    }
+
+                    if (!sequence && !uniprot) {
+                        alert("Please provide either a protein sequence or UniProt ID.");
+                        e.preventDefault();
+                        return;
+                    }
+
+                    const loader = document.getElementById("rightLoading");
+                    if (loader) {
+                        loader.style.display = "flex";
+                    }
+                });
+            }
+
+            // ================= MODAL BACKGROUND CLICK CLOSE =================
+            const modal = document.getElementById("sequenceModal");
+
+            if (modal) {
+                modal.addEventListener("click", function (e) {
+                    if (e.target === this) {
+                        closeSequenceModal();
+                    }
+                });
+            }
+
+        });
+
+        function toggleProteinInput() {
+            const type = document.getElementById("protein_input_type").value;
+
+            if (type === "sequence") {
+                document.getElementById("sequence_input").style.display = "block";
+                document.getElementById("uniprot_input").style.display = "none";
+            } else {
+                document.getElementById("sequence_input").style.display = "none";
+                document.getElementById("uniprot_input").style.display = "block";
+            }
+        }
+
+        function clearInputs() {
+            document.querySelector("input[name='smiles']").value = "";
+            document.querySelector("textarea[name='protein_sequence']").value = "";
+            const uniprot = document.querySelector("input[name='uniprot_id']");
+            if (uniprot) uniprot.value = "";
+        }
+
+        function globalClear() {
+
+            // Clear form fields
+            clearInputs();
+
+            // Remove result cards
+            const rightPane = document.querySelector(".right-pane");
+            rightPane.querySelectorAll(".card").forEach(card => card.remove());
+
+            // Hide loader if visible
+            const loader = document.getElementById("rightLoading");
+            if (loader) loader.style.display = "none";
+
+            // Close popups
+            document.querySelectorAll(".info-popup")
+                .forEach(p => p.style.display = "none");
+        }
+
+        /* ================= REFRESH APP ================= */
+
+        function refreshApp() {
+            window.location.href = window.location.pathname;
+        }
+
+    </script>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- LEFT -->
+
+        <div class="left-pane">
+            <h2>MOA Intelligence Engine</h2>
+
+            <form method="post" enctype="multipart/form-data" id="analysisForm">
+                {% csrf_token %}
+
+                <!-- ================= SMILES ================= -->
+
+                <label>SMILES</label>
+                <input type="text" name="smiles" placeholder="e.g. CC(=O)OC1=CC=CC=C1C(=O)O"
+                    value="{{ smiles|default:'' }}">
+
+                <!-- ================= PROTEIN ================= -->
+
+                <label>Protein Input Type</label>
+                <select id="protein_input_type" onchange="toggleProteinInput()">
+                    <option value="sequence">Protein Sequence</option>
+                    <option value="uniprot">UniProt ID</option>
+                </select>
+
+                <div id="sequence_input">
+                    <label>Protein Sequence</label>
+                    <textarea name="protein_sequence" rows="6"
+                        placeholder="Paste amino acid sequence here">{{ protein_sequence|default:'' }}</textarea>
+                </div>
+
+                <div id="uniprot_input" style="display:none;">
+                    <label>UniProt ID</label>
+                    <input type="text" name="uniprot_id" placeholder="e.g. P00533">
+                </div>
+
+
+                <!-- ================= BUTTONS ================= -->
+
+                <button type="submit">Analysing Mechanism</button>
+
+                <button type="button" onclick="clearInputs()" style="margin-top:10px;background:#334155;">
+                    Clear Inputs
+                </button>
+
+                <button type="button" onclick="globalClear()" style="margin-top:10px;background:#475569;">
+                    Clear All
+                </button>
+
+                <button type="button" onclick="refreshApp()" style="margin-top:10px;background:#0ea5e9;">
+                    Refresh App
+                </button>
+
+
+            </form>
+        </div>
+
+        <!-- RIGHT -->
+
+        <div class="right-pane">
+
+            <!-- ================= RIGHT PANE LOADING ================= -->
+            <div id="rightLoading" style="display:none;">
+                <div class="spinner-container">
+                    <div class="molecule-spinner"></div>
+                    <p>Analyzing Molecular Mechanism...</p>
+                </div>
+            </div>
+
+            <!-- ================= ERROR DISPLAY ================= -->
+            {% if error %}
+            <div class="card" style="background:#7f1d1d;border:1px solid #ef4444;">
+                <div style="color:#fca5a5;font-weight:600;">
+                    {{ error }}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if prediction %}
+
+
+            <!-- ================= PREDICTION ================= -->
+
+            <div class="card">
+                <div class="card-header">
+
+                    <div class="card-title">
+                        Prediction
+
+                        <div class="info-wrapper">
+                            <span class="info-btn" onclick="event.stopPropagation(); togglePopup('pred_info', this)">
+                                i
+                            </span>
+
+                            <div id="pred_info" class="info-popup">
+                                <span class="popup-close" onclick="event.stopPropagation(); closePopup('pred_info')">
+                                    ✕
+                                </span>
+
+                                <strong>Mechanism of Action Prediction</strong><br><br>
+
+                                The predicted MOA represents the mechanism class that the model
+                                considers most consistent with the molecular structure
+                                and protein context provided.<br><br>
+
+                                The prediction integrates:<br>
+                                • Chemical fingerprints (structural features of the ligand)<br>
+                                • Protein embeddings (sequence-derived functional context)<br><br>
+
+                                <strong>Confidence Score</strong><br>
+                                Indicates how strongly the model favors this mechanism
+                                over alternative mechanisms.<br><br>
+
+                                • High (≥ 0.70) → Clear separation from other MOA classes<br>
+                                • Moderate (0.45–0.69) → Competing mechanisms plausible<br>
+                                • Low (&lt; 0.45) → Structural or mechanistic ambiguity<br><br>
+
+                                Confidence reflects relative class dominance, not experimental certainty.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Only THIS toggles collapse -->
+                    <span onclick="toggleCard('pred_content')" style="cursor:pointer;">▾</span>
+
+                </div>
+
+                <div id="pred_content" class="card-content">
+
+                    <div class="big-text">{{ prediction.Predicted_MOA }}</div>
+                    Confidence: {{ prediction.Confidence|floatformat:3 }}
+
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" style="transform:scaleX({{ prediction.Confidence }});"></div>
+                    </div>
+
+                    {% if prediction.Confidence >= 0.7 %}
+                    <div class="confidence-label high">High Confidence – strong separation from alternative MOAs</div>
+                    {% elif prediction.Confidence >= 0.45 %}
+                    <div class="confidence-label moderate">Moderate Confidence – competing mechanism plausible</div>
+                    {% else %}
+                    <div class="confidence-label low">Low Confidence – structural ambiguity across classes</div>
+                    {% endif %}
+
+                </div>
+            </div>
+
+            <!-- ================= CLASS PROBABILITIES ================= -->
+
+            {% if prediction.Full_Probabilities %}
+            <div class="card">
+                <div class="card-header" onclick="toggleCard('prob_content')">
+                    <div class="card-title">
+                        Class Probabilities
+                        <div class="info-wrapper">
+                            <span class="info-btn" onclick="event.stopPropagation();togglePopup('prob_info')">i</span>
+                            <div id="prob_info" class="info-popup">
+                                <span class="popup-close" onclick="event.stopPropagation(); closePopup('prob_info')">
+                                    ✕
+                                </span>
+
+                                <strong>Mechanism Probability Distribution</strong><br><br>
+
+                                This section shows how strongly the model supports each possible
+                                mechanism of action (MOA) for the input molecule.<br><br>
+
+                                Each value represents the model’s estimated likelihood that the
+                                molecule belongs to that mechanism class.<br><br>
+
+                                • All probabilities sum to 1.0 (they compete with each other)<br>
+                                • A dominant high value → clear mechanistic separation<br>
+                                • Multiple similar high values → possible mechanistic overlap<br>
+                                • Broad distribution → structural ambiguity<br><br>
+
+                                This helps assess confidence, class competition, and
+                                potential polypharmacology.
+                            </div>
+                        </div>
+                    </div>
+                    <span>▾</span>
+                </div>
+                <div id="prob_content" class="card-content">
+                    <table>
+                        <tr>
+                            <th>Class</th>
+                            <th>Probability</th>
+                        </tr>
+                        {% for cls,prob in prediction.Full_Probabilities.items %}
+                        <tr>
+                            <td>{{ cls }}</td>
+                            <td>{{ prob|floatformat:3 }}
+                                <div class="mini-bar">
+                                    <div class="confidence-fill" style="transform:scaleX({{ prob }});"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- ================= SIMILARITY ================= -->
+
+            {% if similarity.Results %}
+            <div class="card">
+                <div class="card-header" onclick="toggleCard('sim_content')">
+                    <div class="card-title">
+                        Top Similar Ligand–Protein Pairs
+                        <div class="info-wrapper">
+                            <span class="info-btn" onclick="event.stopPropagation();togglePopup('sim_info')">i</span>
+                            <div id="sim_info" class="info-popup">
+                                <span class="popup-close" onclick="event.stopPropagation(); closePopup('sim_info')">
+                                    ✕
+                                </span>
+
+                                <strong>Multimodal Similarity Search</strong><br><br>
+
+                                This section shows ligand–protein pairs from the dataset
+                                that are most similar to your input.<br><br>
+
+                                Similarity is based on two components:<br><br>
+
+                                • <strong>Ligand Similarity:</strong>
+                                Structural similarity between molecules (chemical fingerprint comparison).<br><br>
+
+                                • <strong>Protein Similarity:</strong>
+                                Similarity between protein sequences using learned embeddings.<br><br>
+
+                                Both similarities are normalized and combined into a single
+                                score between 0 and 1.<br><br>
+
+                                <strong>How to interpret:</strong><br>
+                                • Higher Combined score → stronger overall similarity<br>
+                                • High ligand + high protein → strong multimodal match<br>
+                                • Imbalance between the two → partial similarity<br><br>
+
+                                These results provide biological context for the predicted mechanism of action.
+                            </div>
+                        </div>
+                    </div>
+                    <span>▾</span>
+                </div>
+                <div id="sim_content" class="card-content">
+                    <table>
+                        <tr>
+                            <th>Combined</th>
+                            <th>Ligand</th>
+                            <th>Protein</th>
+                            <th>True MOA</th>
+                            <th>SMILES</th>
+                            <th>Protein Sequence</th>
+                        </tr>
+                        {% for row in similarity.Results %}
+                        <tr>
+                            <td>
+                                {{ row.Combined_Similarity|floatformat:3 }}
+                                <div class="mini-bar">
+                                    <div class="confidence-fill"
+                                        style="transform:scaleX({{ row.Combined_Similarity }});">
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>{{ row.Ligand_Similarity|floatformat:3 }}</td>
+
+                            <td>{{ row.Protein_Similarity|floatformat:3 }}</td>
+
+                            <td>{{ row.True_MOA }}</td>
+
+                            <td>{{ row.SMILES|truncatechars:20 }}</td>
+
+                            <td>
+                                <span class="clickable-seq"
+                                    onclick="openSequenceModal('{{ row.SMILES|escapejs }}', '{{ row.Protein_Sequence|escapejs }}')">
+
+                                    {{ row.Protein_Sequence|truncatechars:10 }}...
+                                </span>
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- ================= MODEL EXPLANATION ================= -->
+
+            {% if explanation.Top_Fragments %}
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title" onclick="toggleCard('exp_content')">
+                        Model Explanation
+                        <div class="info-wrapper">
+                            <span class="info-btn" onclick="event.stopPropagation(); togglePopup('exp_info', this)">
+                                i
+                            </span>
+
+                            <div id="exp_info" class="info-popup">
+                                <span class="popup-close" onclick="event.stopPropagation(); closePopup('exp_info')">
+                                    ✕
+                                </span>
+
+                                <strong>Model Explanation (Structural Attribution)</strong><br><br>
+
+                                This section identifies which molecular fragments most strongly
+                                influenced the predicted mechanism of action.<br><br>
+
+                                Each fragment receives a discrimination score that reflects
+                                how much it supports the predicted mechanism compared to
+                                the next most likely alternative.<br><br>
+
+                                • Positive score → fragment supports the predicted MOA<br>
+                                • Negative score → fragment supports a competing MOA<br>
+                                • Larger absolute value → stronger mechanistic influence<br><br>
+
+                                The Driver percentage indicates whether the prediction is
+                                primarily determined by ligand structure or by the protein context.
+                            </div>
+
+                        </div>
+                    </div>
+                    <span>▾</span>
+                </div>
+
+                <div id="exp_content" class="card-content">
+
+                    Driver: {{ explanation.Driver }}
+                    (Ligand {{ explanation.Ligand_Percent }}% | Protein {{ explanation.Protein_Percent }}%)
+
+                    <table>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Fragment</th>
+                            <th>Score</th>
+                        </tr>
+                        {% for frag in explanation.Top_Fragments %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ frag.fragment }}</td>
+                            <td>{{ frag.discrimination_score|floatformat:4 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+
+                </div>
+            </div>
+            {% endif %}
+
+
+            <!-- ================= MOA SHIFT ANALYSIS ================= -->
+
+            {% if shift.Query_Prediction %}
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title" onclick="toggleCard('shift_content')">
+                        MOA Shift Analysis
+                        <div class="info-wrapper">
+                            <span class="info-btn" onclick="event.stopPropagation(); togglePopup('shift_info')">i</span>
+
+                            <div id="shift_info" class="info-popup">
+                                <span class="popup-close"
+                                    onclick="event.stopPropagation(); closePopup('shift_info')">✕</span>
+
+                                <strong>Directional Structural Shift Analysis</strong><br><br>
+
+                                This module evaluates how specific structural modifications
+                                change the predicted mechanism of action (MOA).<br><br>
+
+                                • Positive Δ → Shift toward that MOA class<br>
+                                • Negative Δ → Shift away from that MOA class<br><br>
+
+                                This directly answers:
+                                “Which structural change pushes the ligand toward or away from a given mechanism?”
+                            </div>
+                        </div>
+                    </div>
+                    <span>▾</span>
+                </div>
+
+                <div id="shift_content" class="card-content">
+
+                    {% if shift.Structural_Counterfactual_Shifts %}
+
+                    <!-- Strongest Driver -->
+                    {% if shift.Strongest_Driver %}
+                    <div style="margin-bottom:20px; font-weight:600; color:#22c55e;">
+                        Strongest Structural Driver:
+                        {{ shift.Strongest_Driver.Modification_Type }}
+                    </div>
+                    {% endif %}
+
+                    <!-- Counterfactual Table -->
+                    <table>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Modification</th>
+                            <th>Primary Effect</th>
+                            {% for cls in shift.Structural_Counterfactual_Shifts.0.Delta_Shift.keys %}
+                            <th>{{ cls }}</th>
+                            {% endfor %}
+                        </tr>
+
+                        {% for item in shift.Structural_Counterfactual_Shifts|slice:":10" %}
+                        <tr>
+
+                            <!-- Rank -->
+                            <td>{{ forloop.counter }}</td>
+
+                            <!-- Modification -->
+                            <td>
+
+                                <!-- Chemical Transform -->
+                                <div style="font-weight:600; margin-bottom:4px;">
+                                    {{ item.Modification_Type }}
+                                </div>
+
+                                <!-- Delta Summary -->
+                                <div style="opacity:0.6; font-size:12px; margin-bottom:6px;">
+                                    {{ item.Delta_Label }}
+                                </div>
+
+                                <!-- Fragment Differences -->
+                                <div style="font-size:11px; line-height:1.4;">
+
+                                    {% if item.Fragments_Added %}
+                                    <div style="color:#22c55e;">
+                                        + {{ item.Fragments_Added|join:", " }}
+                                    </div>
+                                    {% endif %}
+
+                                    {% if item.Fragments_Removed %}
+                                    <div style="color:#ef4444;">
+                                        − {{ item.Fragments_Removed|join:", " }}
+                                    </div>
+                                    {% endif %}
+
+                                    {% if item.Fragments_Replaced %}
+                                    <div style="color:#facc15;">
+                                        ↺ {{ item.Fragments_Replaced|join:", " }}
+                                    </div>
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- Primary Direction -->
+                            <td style="
+                    font-weight:600;
+                    {% if 'Increase' in item.Primary_Direction %}
+                        color:#22c55e;
+                    {% else %}
+                        color:#ef4444;
+                    {% endif %}
+                ">
+                                {{ item.Primary_Direction }}
+                            </td>
+
+                            <!-- Delta values -->
+                            {% for cls,value in item.Delta_Shift.items %}
+                            <td style="
+                    {% if value > 0 %}
+                        color:#22c55e;
+                        font-weight:600;
+                    {% elif value < 0 %}
+                        color:#ef4444;
+                    {% endif %}
+                ">
+                                {{ value|floatformat:4 }}
+                            </td>
+                            {% endfor %}
+
+                        </tr>
+                        {% endfor %}
+
+                    </table>
+
+                    {% else %}
+                    <div style="opacity:0.7;">
+                        No significant structural shifts detected.
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+
+            {% endif %}
+
+            <!-- ================= SIGNATURES ================= -->
+
+            {% if signatures %}
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title" onclick="toggleCard('sig_content')">
+                        Chemical Signatures
+                        <div class="info-wrapper">
+                            <span class="info-btn" onclick="event.stopPropagation(); togglePopup('sig_info')">i</span>
+
+                            <div id="sig_info" class="info-popup">
+                                <span class="popup-close"
+                                    onclick="event.stopPropagation(); closePopup('sig_info')">✕</span>
+
+                                <strong>Chemical Signature Analysis</strong><br><br>
+
+                                This section identifies molecular fragments that are statistically
+                                enriched within each Mechanism of Action (MOA) class in the training dataset.<br><br>
+
+                                <strong>How signatures are discovered:</strong><br><br>
+
+                                • Each molecule is converted into circular fingerprints (ECFP, radius = 2).<br>
+                                • Each fingerprint bit corresponds to a specific local structural fragment.<br>
+                                • For every MOA class, the frequency of each fragment is compared
+                                against all other classes.<br>
+                                • An enrichment score is calculated:<br>
+                                <em>(fragment frequency in class − fragment frequency outside class)</em>.<br><br>
+
+                                <strong>Interpretation:</strong><br><br>
+
+                                • Positive enrichment → fragment is more common in that MOA class<br>
+                                • Higher enrichment score → stronger association with that mechanism<br>
+                                • These fragments represent structural patterns characteristic of
+                                that biological mechanism<br><br>
+
+                                Chemical signatures help explain which structural motifs are
+                                typically associated with different pharmacological behaviors.
+                            </div>
+
+                        </div>
+                    </div>
+                    <span>▾</span>
+                </div>
+
+                <div id="sig_content" class="card-content">
+
+                    {% for cls,frags in signatures.items %}
+                    <h4>{{ cls }}</h4>
+                    <table>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Fragment</th>
+                            <th>Enrichment</th>
+                        </tr>
+                        {% for f in frags %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ f.Fragment }}</td>
+                            <td>{{ f.Enrichment_Score|floatformat:4 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                    <br>
+                    {% endfor %}
+
+                </div>
+            </div>
+            {% endif %} <!-- closes signatures -->
+
+            {% endif %} <!-- closes prediction -->
+
+        </div> <!-- right-pane -->
+    </div> <!-- container -->
+
+    <!-- ================= SEQUENCE MODAL ================= -->
+
+    <div id="sequenceModal" class="modal-overlay">
+
+        <div class="modal-box">
+
+            <div class="modal-close" onclick="closeSequenceModal()">✕</div>
+
+            <h3>Ligand (SMILES)</h3>
+            <div id="modalSmiles" class="modal-content-text"></div>
+
+            <h3>Protein Sequence</h3>
+            <div id="modalProtein" class="modal-content-text"></div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>
